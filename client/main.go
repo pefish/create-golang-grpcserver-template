@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"log"
-	"template/proto/helloworld"
+	"_template_/proto/helloworld"
 	"time"
 
 	"google.golang.org/grpc"

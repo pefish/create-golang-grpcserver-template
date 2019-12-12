@@ -1,4 +1,4 @@
-module template
+module _template_
 
 require (
 	github.com/golang/protobuf v1.3.2

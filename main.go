@@ -9,8 +9,8 @@ import (
 	"google.golang.org/grpc/stats"
 	"google.golang.org/grpc/tap"
 	"net"
-	helloworld "template/proto/helloworld"
-	helloworld_service "template/service/helloworld"
+	helloworld "_template_/proto/helloworld"
+	helloworld_service "_template_/service/helloworld"
 )
 
 type StateHandler struct {

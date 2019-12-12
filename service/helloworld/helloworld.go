@@ -3,7 +3,7 @@ package helloworld
 import (
 	"context"
 	"github.com/pefish/go-logger"
-	"template/proto/helloworld"
+	"_template_/proto/helloworld"
 )
 
 type HelloWorldService struct {
