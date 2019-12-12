@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package helloworld;
+
+service HelloWorld {
+    rpc GetResult (GetResultRequest) returns (GetResultReply) {
+    }
+}
+
+message GetResultRequest {
+    string text = 1;
+}
+
+message GetResultReply {
+    string result = 1;
+}
