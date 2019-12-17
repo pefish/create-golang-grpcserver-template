@@ -11,6 +11,7 @@ import (
 	"net"
 	helloworld "_template_/proto/helloworld"
 	helloworld_service "_template_/service/helloworld"
+	"runtime"
 )
 
 type StateHandler struct {
@@ -33,6 +34,9 @@ func (this *StateHandler) HandleConn(ctx context.Context, connStats stats.ConnSt
 }
 
 func main() {
+
+	runtime.GOMAXPROCS(runtime.NumCPU())
+
 	go_config.Config.MustLoadYamlConfig(go_config.Configuration{
 		ConfigEnvName: `GO_CONFIG`,
 		SecretEnvName: `GO_SECRET`,
