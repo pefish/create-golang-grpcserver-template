@@ -10,7 +10,7 @@ type HelloWorldService struct {
 }
 
 func (this *HelloWorldService) GetResult(ctx context.Context, request *helloworld.GetResultRequest) (*helloworld.GetResultReply, error) {
-	//go_logger.Logger.Info(ctx.Value("method_name"), request)
+	panic(`11`)
 	return &helloworld.GetResultReply{
 		Result: request.GetText(),
 	}, nil

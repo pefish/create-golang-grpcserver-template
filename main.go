@@ -1,37 +1,18 @@
 package main
 
 import (
+	"_template_/proto/helloworld"
+	helloworld_service "_template_/service/helloworld"
 	"context"
 	"github.com/pefish/go-application"
 	"github.com/pefish/go-config"
 	"github.com/pefish/go-logger"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/stats"
-	"google.golang.org/grpc/tap"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"net"
-	helloworld "_template_/proto/helloworld"
-	helloworld_service "_template_/service/helloworld"
 	"runtime"
 )
-
-type StateHandler struct {
-}
-
-func (this *StateHandler) TagRPC(ctx context.Context, info *stats.RPCTagInfo) context.Context {
-	return ctx
-}
-
-func (this *StateHandler) HandleRPC(ctx context.Context, rpcStats stats.RPCStats) {
-
-}
-
-func (this *StateHandler) TagConn(ctx context.Context, info *stats.ConnTagInfo) context.Context {
-	return ctx
-}
-
-func (this *StateHandler) HandleConn(ctx context.Context, connStats stats.ConnStats) {
-
-}
 
 func main() {
 
@@ -51,9 +32,29 @@ func main() {
 	if err != nil {
 		go_logger.Logger.ErrorF("failed to listen: %v", err)
 	}
-	s := grpc.NewServer(grpc.InTapHandle(func(ctx context.Context, info *tap.Info) (i context.Context, e error) {
-		return context.WithValue(ctx, "method_name", info.FullMethodName), nil
-	}), grpc.StatsHandler(&StateHandler{}))
+
+	s := grpc.NewServer(
+		grpc.StreamInterceptor(func(srv interface{}, ss grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
+			defer func() {
+				if err_ := recover(); err_ != nil {
+					go_logger.Logger.Error(err_)
+					err = status.Errorf(codes.Internal, "%#v", err_)
+				}
+			}()
+			go_logger.Logger.DebugF("method: %s, param: %#v", info.FullMethod, srv)
+			return handler(srv, ss)
+		}),
+		grpc.UnaryInterceptor(func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (_ interface{}, err error) {
+			defer func() {
+				if err_ := recover(); err_ != nil {
+					go_logger.Logger.Error(err_)
+					err = status.Errorf(codes.Internal, "%#v", err_)
+				}
+			}()
+			go_logger.Logger.DebugF("method: %s, param: %#v", info.FullMethod, req)
+			return handler(ctx, req)
+		}),
+	)
 	helloworld.RegisterHelloWorldServer(s, &helloworld_service.HelloWorldService{})
 	go_logger.Logger.InfoF(`grpc server started. address: %s`, address)
 	if err := s.Serve(lis); err != nil {

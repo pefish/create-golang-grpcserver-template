@@ -13,7 +13,7 @@ import (
 func main() {
 	report, err := runner.Run(
 		"helloworld.HelloWorld.GetResult",
-		"localhost:8000",
+		"localhost:8001",
 		runner.WithProtoFile("helloworld.proto", []string{`./proto/helloworld`}),
 		runner.WithData(helloworld.GetResultRequest{
 			Text: `0.0.0.0`,

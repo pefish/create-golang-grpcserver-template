@@ -1,16 +1,11 @@
 package main
 
 import (
-	"context"
-	"log"
 	"_template_/proto/helloworld"
-	"time"
-
+	"context"
 	"google.golang.org/grpc"
-)
-
-const (
-	address     = "localhost:8000"
+	"log"
+	"time"
 )
 
 func main() {
@@ -18,7 +13,7 @@ func main() {
 
 	// Set up a connection to the server.
 	dialCtx, dialCancel := context.WithTimeout(context.Background(), 5 * time.Second)
-	conn, err := grpc.DialContext(dialCtx, address, grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := grpc.DialContext(dialCtx, "localhost:8001", grpc.WithInsecure(), grpc.WithBlock())
 	defer dialCancel()
 	if err != nil {
 		log.Fatalf("did not connect: %v", err)
