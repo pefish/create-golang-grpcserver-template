@@ -27,3 +27,11 @@ protoc -Iproto/helloworld/ \
 ```shell script
 curl localhost:8001/v1/get-result -X POST --data '{"text":"grpchaha"}'
 ```
+
+#### 生成http swagger
+```shell script
+protoc -Iproto/helloworld/ \
+  -I$GOPATH/pkg/mod/github.com/grpc-ecosystem/grpc-gateway\@v1.14.3/third_party/googleapis \
+  --swagger_out=proto/helloworld \
+  proto/helloworld/helloworld.proto
+```
