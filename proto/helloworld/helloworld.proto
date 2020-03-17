@@ -2,8 +2,14 @@ syntax = "proto3";
 
 package helloworld;
 
+import "google/api/annotations.proto";
+
 service HelloWorld {
     rpc GetResult (GetResultRequest) returns (GetResultReply) {
+        option (google.api.http) = {
+            post: "/v1/get-result"
+            body: "*"
+        };
     }
 }
 
