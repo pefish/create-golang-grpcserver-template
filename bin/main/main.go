@@ -10,6 +10,7 @@ import (
 	"github.com/pefish/go-logger"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/reflection"
 	"google.golang.org/grpc/status"
 	"log"
 	"net"
@@ -83,7 +84,10 @@ func main() {
 			}
 		}()
 	}
-
+	if go_config.Config.GetBool(`/reflection/enable`) {
+		go_logger.Logger.Info(`reflection service started`)
+		reflection.Register(s) // 启动反射服务
+	}
 	go_logger.Logger.InfoF(`grpc server started. address: %s`, address)
 	if err := s.Serve(lis); err != nil {
 		go_logger.Logger.ErrorF("failed to serve: %v", err)

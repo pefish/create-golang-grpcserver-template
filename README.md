@@ -1,7 +1,7 @@
 
 #### Start
 
-```shell
+```shell script
 protoc -I proto/helloworld/ proto/helloworld/helloworld.proto --go_out=plugins=grpc:proto/helloworld
 
 
@@ -28,4 +28,30 @@ protoc -Iproto/helloworld/ \
   -I$GOPATH/pkg/mod/github.com/grpc-ecosystem/grpc-gateway\@v1.14.3/third_party/googleapis \
   --swagger_out=proto/helloworld \
   proto/helloworld/helloworld.proto
+```
+
+### grpcurl
+
+#### 安装 grpcurl
+```shell script
+go get github.com/fullstorydev/grpcurl
+
+go install github.com/fullstorydev/grpcurl/cmd/grpcurl
+```
+
+#### 访问
+```shell script
+grpcurl -plaintext 0.0.0.0:8000 list  # 列出所有服务
+
+grpcurl -plaintext 0.0.0.0:8000 list helloworld.HelloWorld  # 列出服务的所有方法
+
+grpcurl -plaintext 0.0.0.0:8000 describe helloworld.HelloWorld  # 查看服务
+
+grpcurl -plaintext 0.0.0.0:8000 describe helloworld.HelloWorld.GetResult  # 查看方法
+
+grpcurl -plaintext 0.0.0.0:8000 describe helloworld.GetResultRequest  # 查看类型
+
+grpcurl -plaintext -d '{"text": "haha"}' 0.0.0.0:8000 helloworld.HelloWorld/GetResult  # 调用方法
+
+grpcurl -plaintext -d @ 0.0.0.0:8000 helloworld.HelloWorld/GetResult  # 调用方法。参数从输入读取
 ```
