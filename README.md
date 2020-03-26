@@ -55,3 +55,10 @@ grpcurl -plaintext -d '{"text": "haha"}' 0.0.0.0:8000 helloworld.HelloWorld/GetR
 
 grpcurl -plaintext -d @ 0.0.0.0:8000 helloworld.HelloWorld/GetResult  # 调用方法。参数从输入读取
 ```
+
+### Build
+
+```shell script
+make
+```
+
