@@ -5,7 +5,6 @@ import (
 	helloworld_service "_template_/service/helloworld"
 	"context"
 	runtime2 "github.com/grpc-ecosystem/grpc-gateway/runtime"
-	"github.com/pefish/go-application"
 	"github.com/pefish/go-config"
 	"github.com/pefish/go-logger"
 	"google.golang.org/grpc"
@@ -15,23 +14,18 @@ import (
 	"log"
 	"net"
 	"net/http"
-	"runtime"
+	"os"
 )
 
 func main() {
-
-	runtime.GOMAXPROCS(runtime.NumCPU())
-
-	go_config.Config.MustLoadYamlConfig(go_config.Configuration{
-		ConfigEnvName: `GO_CONFIG`,
-		SecretEnvName: `GO_SECRET`,
+	go_config.ConfigManagerInstance.MustLoadConfig(go_config.Configuration{
+		ConfigFilepath: os.Getenv("GO_CONFIG"),
 	})
-	go_application.Application.Debug = go_config.Config.GetString(`env`) != `prod`
 
-	go_logger.Logger.Init(`default`, ``)
+	go_logger.Logger = go_logger.Logger.CloneWithLevel(go_config.ConfigManagerInstance.MustGetString(`log-level`))
 
 	// 开启grpc服务
-	address := `0.0.0.0:` + go_config.Config.GetString(`port`)
+	address := `0.0.0.0:` + go_config.ConfigManagerInstance.MustGetStringDefault(`port`, "8000")
 	lis, err := net.Listen("tcp", address)
 	if err != nil {
 		go_logger.Logger.ErrorF("failed to listen: %v", err)
@@ -61,7 +55,7 @@ func main() {
 	)
 	helloworld.RegisterHelloWorldServer(s, &helloworld_service.HelloWorldService{})
 
-	httpPort := go_config.Config.GetString(`httpPort`)
+	httpPort := go_config.ConfigManagerInstance.MustGetStringDefault(`httpPort`, "3000")
 	if httpPort != `` {
 		go func() {
 			// 启动http服务
@@ -84,7 +78,7 @@ func main() {
 			}
 		}()
 	}
-	if go_config.Config.GetBool(`/reflection/enable`) {
+	if go_config.ConfigManagerInstance.MustGetBoolDefault(`/reflection/enable`, false) {
 		go_logger.Logger.Info(`reflection service started`)
 		reflection.Register(s) // 启动反射服务
 	}

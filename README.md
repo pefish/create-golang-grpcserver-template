@@ -1,45 +1,51 @@
 
-#### Start
+## Prepare
 
 ```shell script
-protoc -I proto/helloworld/ proto/helloworld/helloworld.proto --go_out=plugins=grpc:proto/helloworld
 
+go install \
+    github.com/grpc-ecosystem/grpc-gateway/protoc-gen-grpc-gateway \
+    github.com/grpc-ecosystem/grpc-gateway/protoc-gen-swagger \
+    github.com/golang/protobuf/protoc-gen-go \
+    google.golang.org/grpc/cmd/protoc-gen-go-grpc
 
-GO_CONFIG=`pwd`/config/local.yaml GO_SECRET=`pwd`/secret/local.yaml go run bin/main/main.go
+go get github.com/grpc-ecosystem/grpc-gateway
+
+protoc -I proto/helloworld/ -I $GOPATH/pkg/mod/github.com/grpc-ecosystem/grpc-gateway@v1.16.0/third_party/googleapis proto/helloworld/helloworld.proto --go_out=proto/helloworld --go-grpc_out=require_unimplemented_servers=false:proto/helloworld
+
 ```
 
-#### 生成http路由处理代码
+## 生成 http 转 grpc 处理代码
 ```shell script
-protoc -Iproto/helloworld/ \
-    -I$GOPATH/src \
-    -I$GOPATH/pkg/mod/github.com/grpc-ecosystem/grpc-gateway\@v1.14.3/third_party/googleapis \
-    --grpc-gateway_out=proto/helloworld --go_out=plugins=grpc:proto/helloworld \
-    proto/helloworld/helloworld.proto
+protoc -I proto/helloworld/ -I $GOPATH/pkg/mod/github.com/grpc-ecosystem/grpc-gateway@v1.16.0/third_party/googleapis --grpc-gateway_out=proto/helloworld proto/helloworld/helloworld.proto
 ```
 
-#### 测试访问http
+## Start
+
+```shell
+GO_CONFIG=`pwd`/config/local.yaml GO_SECRET=`pwd`/secret/local.yaml go run cmd/main/main.go
+```
+
+## 测试访问http
 ```shell script
 curl localhost:8001/v1/get-result -X POST --data '{"text":"grpchaha"}'
 ```
 
-#### 生成http swagger
+## 生成http swagger
 ```shell script
-protoc -Iproto/helloworld/ \
-  -I$GOPATH/pkg/mod/github.com/grpc-ecosystem/grpc-gateway\@v1.14.3/third_party/googleapis \
-  --swagger_out=proto/helloworld \
-  proto/helloworld/helloworld.proto
+protoc -I proto/helloworld/ -I $GOPATH/pkg/mod/github.com/grpc-ecosystem/grpc-gateway@v1.16.0/third_party/googleapis --swagger_out=proto/helloworld proto/helloworld/helloworld.proto
 ```
 
-### grpcurl
+## grpcurl 调试（需要服务端开启 gRPC 反射服务）
 
-#### 安装 grpcurl
+### 安装 grpcurl
 ```shell script
 go get github.com/fullstorydev/grpcurl
 
 go install github.com/fullstorydev/grpcurl/cmd/grpcurl
 ```
 
-#### 访问
+### 访问
 ```shell script
 grpcurl -plaintext 0.0.0.0:8000 list  # 列出所有服务
 
@@ -56,7 +62,7 @@ grpcurl -plaintext -d '{"text": "haha"}' 0.0.0.0:8000 helloworld.HelloWorld/GetR
 grpcurl -plaintext -d @ 0.0.0.0:8000 helloworld.HelloWorld/GetResult  # 调用方法。参数从输入读取
 ```
 
-### Build
+## Build
 
 ```shell script
 make
