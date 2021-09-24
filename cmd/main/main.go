@@ -39,8 +39,12 @@ func main() {
 					err = status.Errorf(codes.Internal, "%#v", err_)
 				}
 			}()
-			go_logger.Logger.DebugF("method: %s, param: %#v", info.FullMethod, srv)
-			return handler(srv, ss)
+			go_logger.Logger.DebugF("StreamInterceptor. method: %s, param: %#v", info.FullMethod, srv)
+			err := handler(srv, ss)
+			if err != nil {
+				go_logger.Logger.Error(err)
+			}
+			return err
 		}),
 		grpc.UnaryInterceptor(func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (_ interface{}, err error) {
 			defer func() {
@@ -49,8 +53,12 @@ func main() {
 					err = status.Errorf(codes.Internal, "%#v", err_)
 				}
 			}()
-			go_logger.Logger.DebugF("method: %s, param: %#v", info.FullMethod, req)
-			return handler(ctx, req)
+			go_logger.Logger.DebugF("UnaryInterceptor. method: %s, param: %#v", info.FullMethod, req)
+			result, err := handler(ctx, req)
+			if err != nil {
+				go_logger.Logger.Error(err)
+			}
+			return result, err
 		}),
 	)
 	helloworld.RegisterHelloWorldServer(s, &helloworld_service.HelloWorldService{})
@@ -83,7 +91,8 @@ func main() {
 		reflection.Register(s) // 启动反射服务
 	}
 	go_logger.Logger.InfoF(`grpc server started. address: %s`, address)
-	if err := s.Serve(lis); err != nil {
+	err = s.Serve(lis)
+	if err != nil {
 		go_logger.Logger.ErrorF("failed to serve: %v", err)
 	}
 }
